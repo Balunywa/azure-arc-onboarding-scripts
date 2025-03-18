@@ -1,17 +1,17 @@
 <#
 .SYNOPSIS
-    Onboards a Windows machine to Azure Arc with Resource Provider Registration.
+    Onboards a Windows machine to Azure Arc with Resource Provider Registration and User Confirmation.
 
 .DESCRIPTION
     This script automates the following steps:
       1. Ensures the script is running with administrator privileges (relaunches if needed).
       2. Parses required parameters.
       3. Generates a unique correlation ID.
-      4. Determines the machine name (with optional override).
-      5. Checks if required Azure Arc resource providers (Microsoft.HybridCompute and Microsoft.ExtendedLocation)
-         are registered in the subscription; if not, it registers them.
-      6. Downloads and runs the Azure Connected Machine Agent installation script.
-      7. Connects the machine to Azure Arc.
+      4. Determines the machine name (with an optional override).
+      5. Checks if required Azure Arc resource providers are registered; if not, it registers them.
+      6. Prompts the user to confirm the installation.
+      7. Downloads and runs the Azure Arc agent installation script.
+      8. Connects the machine to Azure Arc.
 
 .PARAMETER ServicePrincipalId
     The Service Principal Application ID.
@@ -38,14 +38,15 @@
     (Optional) Overrides the machine name. If not provided, the script uses the computer name.
 
 .EXAMPLE
-    PowerShell -ExecutionPolicy Bypass -File onboard_windows.ps1 `
-      -ServicePrincipalId " " `
-      -ServicePrincipalClientSecret " " `
-      -SubscriptionId " " `
-      -ResourceGroup " " `
-      -TenantId " " `
+    PowerShell -ExecutionPolicy Bypass -File windows_onboard.ps1 `
+      -ServicePrincipalId "32e3951c-17d8-4af1-9360-47c34f4544a7" `
+      -ServicePrincipalClientSecret "YOUR_SECRET" `
+      -SubscriptionId "a6513f2e-fae7-4e14-8818-87ecb1820f36" `
+      -ResourceGroup "AZ-Migrate" `
+      -TenantId "070b29e7-e047-4edc-85da-bb395204b580" `
       -Location "eastus" `
-      -Cloud "AzureCloud"
+      -Cloud "AzureCloud" `
+      -MachineNameOverride "MyCustomVM"
 #>
 
 param (
@@ -138,6 +139,13 @@ try {
         else {
             Write-Host "$provider is already registered."
         }
+    }
+
+    # Prompt for user confirmation to continue installation
+    $confirm = Read-Host "Do you want to proceed with the installation of the Azure Arc agent? (Y/N)"
+    if ($confirm -notmatch "^[Yy]$") {
+        Write-Host "Installation aborted by user."
+        exit 0
     }
 
     # Set environment variables for the agent connection

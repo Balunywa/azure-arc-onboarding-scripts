@@ -1,17 +1,17 @@
 #!/bin/bash
-# Onboard Linux VM to Azure Arc with Resource Provider Registration
+# Onboard Linux VM to Azure Arc with Resource Provider Registration and User Confirmation
 #
 # This script performs the following steps:
 # 1. Parses required parameters.
 # 2. Generates a unique correlation ID.
 # 3. Retrieves the machine name.
-# 4. Checks if required Azure Arc resource providers (Microsoft.HybridCompute and Microsoft.ExtendedLocation)
-#    are registered in the subscription; if not, it registers them.
-# 5. Downloads and runs the Azure Connected Machine Agent installation script.
-# 6. Connects the machine to Azure Arc.
+# 4. Checks if required Azure Arc resource providers are registered; if not, it registers them.
+# 5. Prompts the user to confirm installation.
+# 6. Downloads and runs the Azure Connected Machine Agent installation script.
+# 7. Connects the machine to Azure Arc.
 #
 # Usage:
-#   ./onboard.sh <ServicePrincipalId> <ServicePrincipalClientSecret> <SubscriptionId> <ResourceGroup> <TenantId> <Location> <Cloud>
+#   ./linux_onboard.sh <ServicePrincipalId> <ServicePrincipalClientSecret> <SubscriptionId> <ResourceGroup> <TenantId> <Location> <Cloud>
 
 set -e
 
@@ -42,7 +42,8 @@ if ! command -v az &> /dev/null; then
   exit 1
 fi
 
-# Optionally, log in using the service principal if not already logged in
+# Optionally log in using the service principal if not already logged in
+# Uncomment the following line if needed:
 # az login --service-principal -u "$ServicePrincipalId" -p "$ServicePrincipalClientSecret" --tenant "$TenantId"
 
 # Set the active subscription
@@ -61,7 +62,14 @@ for provider in Microsoft.HybridCompute Microsoft.ExtendedLocation; do
     fi
 done
 
-# Download the Azure Connected Machine Agent installation script
+# Prompt for user confirmation to continue installation
+read -p "Do you want to proceed with the installation of the Azure Arc agent? (y/n): " confirm
+if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    echo "Installation aborted by user."
+    exit 0
+fi
+
+# Download the Azure Arc agent installation script
 INSTALL_SCRIPT="/tmp/Install_linux_azcmagent.sh"
 echo "Downloading Azure Arc agent installation script..."
 wget https://aka.ms/azcmagent -O "$INSTALL_SCRIPT"
@@ -91,4 +99,5 @@ else
   echo "Azure Arc onboarding failed."
   exit 1
 fi
+
 
