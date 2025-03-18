@@ -1,56 +1,85 @@
-# Azure Arc Onboarding Scripts for Rapid POC
 
-This repository contains scripts to rapidly onboard five to ten virtual machines to Azure Arc as part of a proof-of-concept (POC). These scripts are designed for both Linux and Windows environments, streamlining the onboarding process by dynamically generating required parameters (such as correlation identifiers and machine names) and handling prerequisite checks, resource provider registration, and logging.
+Azure Arc Onboarding Scripts for Rapid POC
 
----
+This repository provides scripts to rapidly onboard 5–10 virtual machines to Azure Arc as part of a proof-of-concept (POC). The scripts support both Linux and Windows environments, streamlining the onboarding process by dynamically generating required parameters, handling prerequisite checks, registering resource providers, and managing logging.
 
-## Linux Onboarding
+Table of Contents
 
-### Script: `linux_onboard.sh`
+Overview
+Scripts
+Linux Onboarding
+Windows Onboarding
+Getting Started
+Notes
+Overview
 
-#### Purpose
+Purpose: Quickly integrate virtual machines with Azure Arc for POC scenarios.
+Key Benefits:
+Automated parameter generation (e.g., correlation IDs, machine names)
+Prerequisite and resource provider checks
+Cross-platform support (Linux and Windows)
+User confirmation to safeguard against unintended deployments
+Scripts
+
+Linux Onboarding
+Script Name
+
+linux_onboard.sh
+
+Purpose
 
 Onboards a Linux virtual machine to Azure Arc.
 
-#### Features
+Features
 
-- Accepts parameters for service principal credentials, subscription details, resource group, tenant ID, location, and cloud environment.
-- Dynamically generates a correlation identifier using `uuidgen`.
-- Retrieves the machine name using the `hostname` command.
-- Checks and registers required Azure Arc resource providers (`Microsoft.HybridCompute` and `Microsoft.ExtendedLocation`).
-- Prompts the user to confirm before proceeding with installation.
-- Downloads and executes the Azure Arc agent installation script.
-- Connects the virtual machine to Azure Arc using the Azure Connected Machine Agent.
+Parameter Inputs:
+Accepts service principal credentials, subscription details, resource group, tenant ID, location, and cloud environment.
+Dynamic Generation:
+Uses uuidgen for correlation identifiers and hostname for machine names.
+Resource Provider Checks:
+Validates and registers Microsoft.HybridCompute and Microsoft.ExtendedLocation.
+User Interaction:
+Prompts for confirmation before proceeding.
+Agent Installation:
+Downloads and executes the Azure Arc agent installation script.
+Connection:
+Connects the virtual machine using the Azure Connected Machine Agent.
+Usage
 
-#### Usage
-
-```sh
 ./linux_onboard.sh <ServicePrincipalId> <ServicePrincipalClientSecret> \
                    <SubscriptionId> <ResourceGroup> <TenantId> <Location> <Cloud>
-
 Prerequisites
 
 Bash shell
 wget and uuidgen installed
 Azure CLI (az) installed and configured
-Azure Connected Machine Agent supported on the target Linux distribution
+Supported Linux distribution for the Azure Connected Machine Agent
 Windows Onboarding
+Script Name
 
-Script: windows_onboard.ps1
+windows_onboard.ps1
+
 Purpose
 
 Onboards a Windows virtual machine to Azure Arc.
 
 Features
 
-Accepts parameters for service principal credentials, subscription details, resource group, tenant ID, location, and cloud environment.
-Automatically checks for administrator privileges and re-launches with elevation if needed.
-Dynamically generates a new correlation identifier.
-Retrieves the machine name from the system (with an optional override parameter).
-Checks and registers required Azure Arc resource providers.
-Prompts the user to confirm before proceeding with installation.
+Parameter Inputs:
+Accepts service principal credentials, subscription details, resource group, tenant ID, location, and cloud environment.
+Admin Privileges:
+Checks for administrator rights and auto-elevates if necessary.
+Dynamic Generation:
+Creates a new correlation identifier.
+Machine Name:
+Retrieves the machine name with an optional override.
+Resource Provider Checks:
+Validates and registers required providers.
+User Interaction:
+Prompts for confirmation before proceeding.
+Agent Installation:
 Downloads and executes the Azure Arc agent installation script for Windows.
-Connects the virtual machine to Azure Arc using the Azure Connected Machine Agent.
+Logging:
 Logs errors remotely for troubleshooting.
 Usage
 
@@ -63,7 +92,7 @@ PowerShell -ExecutionPolicy Bypass -File windows_onboard.ps1 `
   -Location "<Location>" `
   -Cloud "<Cloud>" `
   [-MachineNameOverride "<MachineName>"]
-Example:
+Example
 
 PowerShell -ExecutionPolicy Bypass -File windows_onboard.ps1 `
   -ServicePrincipalId "32e3951c-17d8-4af1-9360-47c34f4544a7" `
@@ -77,30 +106,26 @@ PowerShell -ExecutionPolicy Bypass -File windows_onboard.ps1 `
 Prerequisites
 
 Windows PowerShell (version 5.0+ or PowerShell Core)
-Administrator privileges (script auto-elevates if needed)
+Administrator privileges (auto-elevation if needed)
 Internet access for downloading the agent installation script
-Azure CLI (az) installed (for resource provider registration)
+Azure CLI (az) installed for resource provider registration
 Getting Started
 
-1. Clone the Repository
+Clone the Repository
 git clone https://github.com/<YourGitHubUsername>/azure-arc-onboarding-scripts.git
 cd azure-arc-onboarding-scripts
-2. Review and Configure
-Linux
-
+Review and Configure
+Linux:
 Ensure wget, uuidgen, and Azure CLI are installed.
 Confirm the Linux distribution is supported by the Azure Connected Machine Agent.
-Windows
-
-Ensure execution policy allows scripts (-ExecutionPolicy Bypass).
-Confirm the Azure CLI is installed.
-3. Deploy on Virtual Machines
-Linux
-
+Windows:
+Ensure the execution policy allows scripts (using -ExecutionPolicy Bypass).
+Confirm Azure CLI is installed.
+Deploy on Virtual Machines
+Linux:
 ./linux_onboard.sh <ServicePrincipalId> <ServicePrincipalClientSecret> \
                    <SubscriptionId> <ResourceGroup> <TenantId> <Location> <Cloud>
-Windows
-
+Windows:
 PowerShell -ExecutionPolicy Bypass -File windows_onboard.ps1 `
   -ServicePrincipalId "<ServicePrincipalId>" `
   -ServicePrincipalClientSecret "<ServicePrincipalClientSecret>" `
@@ -110,11 +135,15 @@ PowerShell -ExecutionPolicy Bypass -File windows_onboard.ps1 `
   -Location "<Location>" `
   -Cloud "<Cloud>" `
   [-MachineNameOverride "<MachineName>"]
-To automate deployments across multiple machines, use orchestration tools like Ansible, System Center Configuration Manager (SCCM), or other configuration management systems.
-
+Automation Tip:
+For deployments across multiple machines, consider orchestration tools like Ansible, System Center Configuration Manager (SCCM), or other configuration management systems.
 Notes
 
-These scripts are for rapid POC deployments. For production use, implement additional error handling and security reviews.
-Each execution generates a unique correlation identifier for tracking and troubleshooting.
-The scripts automatically register required Azure Arc resource providers (Microsoft.HybridCompute, Microsoft.ExtendedLocation).
-User confirmation is required before installation to prevent unintended deployments.
+POC Focus:
+These scripts are optimized for rapid POC deployments. For production, additional error handling and security reviews are recommended.
+Correlation Identifier:
+Each execution generates a unique identifier for tracking and troubleshooting.
+Resource Providers:
+Automatically registers the required Azure Arc resource providers (Microsoft.HybridCompute and Microsoft.ExtendedLocation).
+User Confirmation:
+A confirmation step is included to prevent accidental deployments.
